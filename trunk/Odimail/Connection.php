@@ -1,4 +1,17 @@
 <?php
+/* SVN FILE: $Id: $ */
+/**
+ * odimail-php : An easy-to-use interface to access IMAP and POP3 servers
+ * 
+ * Licensed under The MIT License
+ * 
+ * @author			Juan Odicio Arrieta
+ * @link			http://code.google.com/p/odimail-php/ 	
+ * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @version			$Revision: $
+ * @modifiedby		$LastChangedBy: $
+ * @lastmodified	$Date: $
+ */
 
 class Odimail_Connection 
 {
@@ -11,7 +24,7 @@ class Odimail_Connection
     protected $_messagesCount = 0;
     
     /**
-     * Stream resource as returned by the imap_open function
+     * Stream resource as the returned by the imap_open function
      * 
      * @var resource
      */
@@ -206,7 +219,6 @@ class Odimail_Connection
      * Sets configuration parameters 
      * 
      * @param array $config
-     * 
      * @return void
      */
     protected function _setup(array $config)
