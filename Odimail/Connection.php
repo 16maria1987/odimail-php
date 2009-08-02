@@ -1,5 +1,4 @@
 <?php
-/* SVN FILE: $Id: $ */
 /**
  * odimail-php : An easy-to-use interface to access IMAP and POP3 servers
  * 
@@ -8,9 +7,6 @@
  * @author			Juan Odicio Arrieta
  * @link			http://code.google.com/p/odimail-php/ 	
  * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
- * @version			$Revision: $
- * @modifiedby		$LastChangedBy: $
- * @lastmodified	$Date: $
  */
 
 class Odimail_Connection 

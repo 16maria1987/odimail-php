@@ -1,4 +1,13 @@
 <?php
+/**
+ * odimail-php : An easy-to-use interface to access IMAP and POP3 servers
+ * 
+ * Licensed under The MIT License
+ * 
+ * @author			Juan Odicio Arrieta
+ * @link			http://code.google.com/p/odimail-php/ 	
+ * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
+ */
 
 class Odimail_Contact 
 {
