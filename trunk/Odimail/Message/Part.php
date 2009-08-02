@@ -1,4 +1,13 @@
 <?php
+/**
+ * odimail-php : An easy-to-use interface to access IMAP and POP3 servers
+ * 
+ * Licensed under The MIT License
+ * 
+ * @author			Juan Odicio Arrieta
+ * @link			http://code.google.com/p/odimail-php/ 	
+ * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
+ */
 
 class Odimail_Message_Part
 {
@@ -108,6 +117,7 @@ class Odimail_Message_Part
     }
     
     /**
+     * Gets the content of the message 
      * 
      * @return string
      */
@@ -117,6 +127,7 @@ class Odimail_Message_Part
     }
     
     /**
+     * Gets the decoded content of the message-part
      * 
      * @return string
      */
@@ -151,6 +162,7 @@ class Odimail_Message_Part
     }
     
     /**
+     * Gets the size of the message-part before it is decoded
      * 
      * @return int
      */
@@ -160,7 +172,7 @@ class Odimail_Message_Part
     }
     
     /**
-     * Gets the size of the message part
+     * Gets the size of the message-part after it is decoded
      * 
      * @return int
      */
