@@ -1,0 +1,286 @@
+<?php
+
+class Odimail_Message extends Odimail_Message_Part
+{
+    /**
+     * 
+     * @var Odimail_Connection
+     */
+    protected $_connection = null;
+    
+    /**
+     * Mailbox name 
+     * 
+     * @var string
+     */
+    protected $_mailbox = '';
+    
+    /**
+     * Message number in the mailbox
+     * 
+     * @var int
+     */
+    protected $_messageNo = 0;
+    
+    /**
+     * 
+     * @var string
+     */
+    protected $_subject = '';
+    
+    /**
+     * 
+     * @var Odimail_Contact
+     */
+    protected $_from = null;
+    
+    /**
+     * 
+     * @var array
+     */
+    protected $_to = array();
+    
+    /**
+     * 
+     * @var array
+     */
+    protected $_cc = array();
+    
+    /**
+     * 
+     * @var array
+     */
+    protected $_bcc = array();
+    
+    /**
+     * 
+     * @var Odimail_Contact
+     */
+    protected $_replyTo = null;
+    
+    /**
+     * Date of the message
+     * 
+     * @var string
+     */
+    protected $_date;
+    
+    /**
+     * Number of attachments
+     * 
+     * @var int
+     */
+    protected $_attachmentsCount = null;
+    
+    /**
+     * Array with a $attachmentNumber-$messagePartNumber mapping
+     * Where:
+     * $attachmentNumber => $messagePartNumber
+     * 
+     * @var array
+     */
+    protected $_attachmentPartMap = array();
+    
+    /**
+     * 
+     * @param Odimail_Connection $connection
+     * @param string $mailbox
+     * @param int $messageNo
+     * @return Odimail_Message
+     */
+    public function __construct($connection, $mailbox, $messageNo)
+    {
+        $this->_connection = $connection;
+        $this->_mailbox = $mailbox;
+        $this->_messageNo = $messageNo;
+        
+        $this->_structure = imap_fetchstructure($connection->getStream(), $messageNo);
+        $this->_proccessHeaders();
+    }
+    
+    /**
+     * Gets the message number
+     * 
+     * @return int
+     */
+    public function getMessageNumber()
+    {
+        return $this->_messageNo;
+    }
+    
+    /**
+     * Gets the mailbox name of this message
+     * 
+     * @return string
+     */
+    public function getMailbox()
+    {
+        return $this->_mailbox;
+    }
+    
+    /**
+     * Gets the subject of the message
+     * 
+     * @return string
+     */
+    public function getSubject()
+    {
+        return $this->_subject;
+    }
+    
+    /**
+     * Gets the From information
+     * 
+     * @return Odimail_Contact
+     */
+    public function getFrom()
+    {
+        return $this->_from;
+    }
+    
+    /**
+     * Gets a collection with all contacts in the To header
+     * 
+     * @return array
+     */
+    public function getTo()
+    {
+        return $this->_to; 
+    }
+    
+    /**
+     * Gets a collection with all contacts in the Cc header
+     * 
+     * @return array
+     */
+    public function getCc()
+    {
+        return $this->_cc;    
+    }
+    
+    /**
+     * Gets the Reply-to header information
+     * 
+     * @return Odimail_Contact
+     */
+    public function getReplyTo()
+    {
+        return $this->_replyTo;
+    }
+    
+    /**
+     * Gets the body of the message
+     * 
+     * @return string
+     */
+    public function getBody()
+    {
+        // TODO 
+        return '';
+    }
+    
+    /**
+     * Gets the date of the message
+     * 
+     * @param string $format 
+     * @return mixed
+     */
+    public function getDate($format = null)
+    {
+        if (is_string($format)) {
+            return date($format, $this->_date);
+        }
+        return $this->_date;
+    }
+    
+    /**
+     * Returns the number of attachments
+     * 
+     * @return int
+     */
+    public function countAttachments()
+    {
+        if ($this->_attachmentsCount == null) {
+            $this->_attachmentsCount = 0;
+            
+            $cont = 0;
+            if (is_array($this->_structure->parts)) {
+                foreach ($this->_structure->parts as $numPart => $part) {
+                    if ($part->ifdparameters == 1 
+                        && count($part->dparameters) > 0
+                        && in_array($part->dparameters[0]->attribute, array('name', 'filename'))) 
+                    {
+                        $cont += 1;
+                        $this->_attachmentPartMap[$cont] = $numPart;
+                        $this->_attachmentsCount++;
+                    }
+                }
+            }
+        }
+        
+        return $this->_attachmentsCount;
+    }
+    
+    /**
+     * Returns an attachment
+     * 
+     * @param int $attachmentNo
+     * @return Odimail_Message_Attachment
+     */
+    public function getAttachment($attachmentNo)
+    {
+        if ($attachmentNo <= $this->countAttachments() && $attachmentNo != 0) {
+            $partNumber = $this->_attachmentPartMap[$attachmentNo];
+            $attachment = new Odimail_Message_Attachment($this, $this->_structure->parts[$partNumber], $partNumber);
+            return $attachment;
+        }
+    }
+    
+    /**
+     * Proccess the headers of the message
+     * 
+     * @return void
+     */
+    protected function _proccessHeaders()
+    {
+        $headerInfo = imap_headerinfo($this->_connection->getStream(), $this->getMessageNumber());
+        
+        // Subject
+        $subject = imap_mime_header_decode($headerInfo->subject);
+        $this->_subject = $subject[0]->text;
+        
+        // From 
+        if (isset($headerInfo->from)) {
+            $this->_from = new Odimail_Contact($headerInfo->from[0]);
+        }
+        
+        // Reply to
+        if (isset($headerInfo->reply_to)) {
+            $this->_replyTo = new Odimail_Contact($headerInfo->reply_to[0]);
+        }
+        
+        // To
+        foreach ($headerInfo->to as $contact) {
+            $this->_to[] = new Odimail_Contact($contact);
+        }
+        
+        // Cc
+        if (isset($headerInfo->cc)) {
+            foreach ($headerInfo->cc as $contact) {
+                $this->_cc[] = new Odimail_Contact($contact);
+            }
+        }
+        
+        // Bcc
+        if (isset($headerInfo->bcc)) {
+            foreach ($headerInfo->bcc as $contact) {
+                $this->_bcc[] = new Odimail_Contact($contact);
+            }
+        }
+        
+        // Date
+        $this->_date = $headerInfo->udate;
+        
+    }
+    
+}
