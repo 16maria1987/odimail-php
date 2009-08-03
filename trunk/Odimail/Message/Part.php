@@ -17,13 +17,7 @@ class Odimail_Message_Part
      * @var Odimail_Connection
      */
     protected $_connection = null;
-    
-    /**
-     * 
-     * @var Odimail_Message_Part
-     */
-    protected $_parent = null;
-    
+       
     /**
      * Mailbox name 
      * 
@@ -114,16 +108,6 @@ class Odimail_Message_Part
                 $this->_parameters[$param->attribute] = $param->value;    
             }
         }
-    }
-    
-    /**
-     * Return true if it's a multipart message
-     * 
-     * @return bool
-     */
-    public function isMultipart()
-    {
-        return $this->_structure->type == 1;
     }
     
     /**
@@ -367,15 +351,6 @@ class Odimail_Message_Part
     public function hasParameter($key)
     {
         return array_key_exists($key, $this->_parameters);
-    }
-    
-    /**
-     * 
-     * @return Odimail_Message_Part
-     */
-    public function getParent()
-    {
-        return $this->_parent;
     }
     
     /**
