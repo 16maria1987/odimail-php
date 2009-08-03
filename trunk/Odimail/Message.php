@@ -11,26 +11,7 @@
 
 class Odimail_Message extends Odimail_Message_Part
 {
-    /**
-     * 
-     * @var Odimail_Connection
-     */
-    protected $_connection = null;
-    
-    /**
-     * Mailbox name 
-     * 
-     * @var string
-     */
-    protected $_mailbox = '';
-    
-    /**
-     * Message number in the mailbox
-     * 
-     * @var int
-     */
-    protected $_messageNo = 0;
-    
+
     /**
      * 
      * @var string
@@ -93,17 +74,14 @@ class Odimail_Message extends Odimail_Message_Part
     /**
      * 
      * @param Odimail_Connection $connection
-     * @param string $mailbox
      * @param int $messageNo
+     * @param string $mailbox
      * @return Odimail_Message
      */
-    public function __construct($connection, $mailbox, $messageNo)
+    public function __construct($connection, $messageNo, $mailbox)
     {
-        $this->_connection = $connection;
-        $this->_mailbox = $mailbox;
-        $this->_messageNo = $messageNo;
-        
-        $this->_structure = imap_fetchstructure($connection->getStream(), $messageNo);
+        parent::__constuct($connection, $messageNo, '');
+        $this->_mailbox = $mailbox;      
         $this->_proccessHeaders();
     }
     
