@@ -41,14 +41,13 @@ class Odimail_Contact
             $this->_email = $email;
         } 
         
-        if (is_array($config)) {
+        if (is_array($config) && isset($config['email'])) {
+            $this->_email = $config['email'];
+            
             if (isset($config['name'])) {
                 $this->_name = $config['name'];
             }
             
-            if (isset($config['email'])) {
-                $this->_name = $config['email'];
-            }
         }
     }
     
