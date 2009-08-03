@@ -130,7 +130,7 @@ class Odimail_Connection
     public function getMessage($messageNo)
     {
         if ($messageNo > 0 && $messageNo <= $this->_messagesCount) {
-            return new Odimail_Message($this, $this->_mailbox, $messageNo);
+            return new Odimail_Message($this, $messageNo, $this->_mailbox);
         }
     }
     

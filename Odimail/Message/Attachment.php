@@ -12,13 +12,6 @@
 class Odimail_Message_Attachment extends Odimail_Message_Part
 {
     
-    
-    
-    public function __construct()
-    {
-        
-    }
-    
     /**
      * Gets the filename of the attachment
      * 

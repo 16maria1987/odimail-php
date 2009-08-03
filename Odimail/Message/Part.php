@@ -14,6 +14,33 @@ class Odimail_Message_Part
     
     /**
      * 
+     * @var Odimail_Connection
+     */
+    protected $_connection = null;
+    
+    /**
+     * Mailbox name 
+     * 
+     * @var string
+     */
+    protected $_mailbox = '';
+    
+    /**
+     * Message number in the mailbox
+     * 
+     * @var int
+     */
+    protected $_messageNo = 0;
+
+    /**
+     * Section of the message
+     * 
+     * @var string
+     */
+    protected $_section = '';
+    
+    /**
+     * 
      * @var object
      */
     protected $_structure = null;
@@ -35,6 +62,22 @@ class Odimail_Message_Part
      * @var string
      */
     protected $_rawContent = null;
+    
+    /**
+     * 
+     * @param Odimail_Connection $connection
+     * @param int $messageNo
+     * @param string $section
+     * @return void
+     */
+    public function __constuct($connection, $messageNo, $section = '')
+    {
+        $this->_connection = $connection;
+        $this->_messageNo  = $messageNo;
+        $this->_section    = $section;
+        
+        $this->_structure = imap_bodystruct($connection->getStream(), $messageNo, $section);
+    }
     
     /**
      * Return true if it's a multipart message
