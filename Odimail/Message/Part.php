@@ -175,6 +175,7 @@ class Odimail_Message_Part
      * Gets the enconding
      * 0 => 7BIT, 1 => 8BIT, 2 => BINARY
      * 3 => BASE64, 4 => QUOTED-PRINTABLE, 5 => OTHER
+     * 
      * @return int
      */
     public function getEncoding()
@@ -204,6 +205,7 @@ class Odimail_Message_Part
      */
     public function getContent()
     {
+        
         if ($this->_decodedConent == null) {
             $rawContent = $this->getRawContent();
             
@@ -261,6 +263,8 @@ class Odimail_Message_Part
             return new Odimail_Message_Part($this->getConnection()
                                 , $this->getMessageNumber(), $section);
         }
+        
+        return null;
     }
     
     /**
@@ -333,7 +337,7 @@ class Odimail_Message_Part
     }
     
     /**
-     * Gets all parameters
+     * Gets an array with all parameters
      * 
      * @return array
      */
