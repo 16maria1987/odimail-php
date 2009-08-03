@@ -19,9 +19,11 @@ class Odimail_Message_Attachment extends Odimail_Message_Part
      */
     public function getFileName() 
     {
-        if ($this->_structure->dparameters[0]->attribute == 'filename') {
-            return $this->_structure->dparameters[0]->value;
+        if ($this->hasParameter('filename')) {
+            return $this->getParameter('filename');
         }
+        
+        return '';
     }
     
     /**
@@ -32,7 +34,12 @@ class Odimail_Message_Attachment extends Odimail_Message_Part
      */
     public function save($path)
     {
-        
+        try {
+            return file_put_contents($path, $this->getContent());
+            
+        } catch (Exception $ex) {
+            return false;
+        }
     }
     
     

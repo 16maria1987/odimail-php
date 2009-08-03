@@ -63,6 +63,13 @@ class Odimail_Message extends Odimail_Message_Part
     protected $_attachmentsCount = null;
     
     /**
+     * Array of Odimail_Message_Attachment objects
+     * 
+     * @var array
+     */
+    protected $_attachments = array();
+    
+    /**
      * Array with a $attachmentNumber-$messagePartNumber mapping
      * Where:
      * $attachmentNumber => $messagePartNumber
@@ -191,18 +198,21 @@ class Odimail_Message extends Odimail_Message_Part
             $this->_attachmentsCount = 0;
             
             $cont = 0;
-            if (is_array($this->_structure->parts)) {
-                foreach ($this->_structure->parts as $numPart => $part) {
-                    if ($part->ifdparameters == 1 
-                        && count($part->dparameters) > 0
-                        && in_array($part->dparameters[0]->attribute, array('name', 'filename'))) 
-                    {
+            
+            if ($this->countParts() > 0) {
+                for ($i = 1; $i <= $this->countParts(); $i++) {
+                    $part = $this->getPart($i);
+                    
+                    if ($part->hasParameter('filename')) {
                         $cont += 1;
-                        $this->_attachmentPartMap[$cont] = $numPart;
-                        $this->_attachmentsCount++;
+                        $attachment = new Odimail_Message_Attachment($this->_connection,
+                                        $this->getMessageNumber(), $i);
+                                        
+                        $this->_attachments[$cont] = $attachment; 
                     }
                 }
             }
+            
         }
         
         return $this->_attachmentsCount;

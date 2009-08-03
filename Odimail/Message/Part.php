@@ -19,6 +19,12 @@ class Odimail_Message_Part
     protected $_connection = null;
     
     /**
+     * 
+     * @var Odimail_Message_Part
+     */
+    protected $_parent = null;
+    
+    /**
      * Mailbox name 
      * 
      * @var string
@@ -51,7 +57,6 @@ class Odimail_Message_Part
      */
     protected $_decodedConent = null;
     
-    
     /**
      * 
      * @var string
@@ -64,7 +69,12 @@ class Odimail_Message_Part
      */
     protected $_decodedContentLength = null;
     
-    
+    /**
+     * 
+     * @var array
+     */
+    protected $_parameters = array();
+        
     /**
      * 
      * @param Odimail_Connection $connection
@@ -78,12 +88,31 @@ class Odimail_Message_Part
         $this->_messageNo  = $messageNo;
         $this->_section    = $section;
         
-        if ($section === '') {
-            $this->_structure = imap_fetchstructure($connection->getStream(), $messageNo);
-            echo "imap_fetchstructure\n";
-        } else {
-            $this->_structure = imap_bodystruct($connection->getStream()
-                                               , $messageNo, $section);                                                                      
+        $struct = imap_fetchstructure($connection->getStream(), $messageNo);
+        
+        if ($section !== '') {
+            $sectionParts = explode('.', $section);   
+             
+            foreach ($sectionParts as $index) {
+                $index = intval($index) - 1;
+                if (isset($struct->parts) && array_key_exists($index, $struct->parts)) {
+                    $struct = $struct->parts[$index];
+                }
+            }
+        }
+        
+        $this->_structure = $struct;
+        
+        if ($this->_structure->ifparameters == 1) {
+            foreach ($this->_structure->parameters as $key => $value) {
+                $this->_parameters[$param->attribute] = $param->value;    
+            }
+        }
+        
+        if ($this->_structure->ifdparameters == 1) {
+            foreach ($this->_structure->dparameters as $param) {
+                $this->_parameters[$param->attribute] = $param->value;    
+            }
         }
     }
     
@@ -139,7 +168,9 @@ class Odimail_Message_Part
      */
     public function getMimeTypeString()
     {
-        return $this->getMimeType() . '/' . $this->getMimeSubtype();
+        $subtype   = $this->getMimeSubtype();
+        $separator = ($subtype == '') ? '' : '/';
+        return $this->getMimeType() . $separator . $subtype;
     }
     
     /**
@@ -149,8 +180,7 @@ class Odimail_Message_Part
      */
     public function getMimeSubtype()
     {
-        return $this->_structure->subtype;
-        if (isset($this->_structure->subtype)) {
+        if ($this->_structure->ifsubtype == 1) {
             return $this->_structure->subtype;
         } else {
             return '';
@@ -301,6 +331,51 @@ class Odimail_Message_Part
     public function getSection()
     {
         return $this->_section;
+    }
+    
+    /**
+     * Gets the value of the parameter $key
+     * 
+     * @return string
+     */
+    public function getParameter($key)
+    {
+        $key = (string) $key;
+        if (key_exists($key, $this->_parameters)) {
+            return $this->_parameters[$key];
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * Gets all parameters
+     * 
+     * @return array
+     */
+    public function getParameters()
+    {
+        return $this->_parameters;    
+    }
+    
+    /**
+     * Return true if the $key parameter exists
+     * 
+     * @param string $key
+     * @return bool
+     */
+    public function hasParameter($key)
+    {
+        return array_key_exists($key, $this->_parameters);
+    }
+    
+    /**
+     * 
+     * @return Odimail_Message_Part
+     */
+    public function getParent()
+    {
+        return $this->_parent;
     }
     
     /**
