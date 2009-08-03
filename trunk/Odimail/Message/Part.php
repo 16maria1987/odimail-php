@@ -51,11 +51,6 @@ class Odimail_Message_Part
      */
     protected $_decodedConent = null;
     
-    /**
-     * 
-     * @var int
-     */
-    protected $_decodedContentLength = null;
     
     /**
      * 
@@ -65,18 +60,31 @@ class Odimail_Message_Part
     
     /**
      * 
+     * @var int
+     */
+    protected $_decodedContentLength = null;
+    
+    
+    /**
+     * 
      * @param Odimail_Connection $connection
      * @param int $messageNo
      * @param string $section
      * @return void
      */
-    public function __constuct($connection, $messageNo, $section = '')
+    public function __construct($connection, $messageNo, $section = '')
     {
         $this->_connection = $connection;
         $this->_messageNo  = $messageNo;
         $this->_section    = $section;
         
-        $this->_structure = imap_bodystruct($connection->getStream(), $messageNo, $section);
+        if ($section === '') {
+            $this->_structure = imap_fetchstructure($connection->getStream(), $messageNo);
+            echo "imap_fetchstructure\n";
+        } else {
+            $this->_structure = imap_bodystruct($connection->getStream()
+                                               , $messageNo, $section);                                                                      
+        }
     }
     
     /**
@@ -98,28 +106,28 @@ class Odimail_Message_Part
     {
         switch ($this->_structure->type) {
             case 0:
-                return 'text';
+                return 'TEXT';
                 break;
             case 1:
-                return 'multipart';
+                return 'MULTIPART';
                 break;
             case 2:
-                return 'message';
+                return 'MESSAGE';
                 break;
             case 3:
-                return 'application';
+                return 'APPLICATION';
                 break;
             case 4:
-                return 'audio';
+                return 'AUDIO';
                 break;
             case 5:
-                return 'image';
+                return 'IMAGE';
                 break;
             case 6:
-                return 'video';
+                return 'VIDEO';
                 break;
             case 7:
-                return 'other';                
+                return 'OTHER';                
         }
         
     }
@@ -141,7 +149,8 @@ class Odimail_Message_Part
      */
     public function getMimeSubtype()
     {
-        if ($this->_structure->ifsubtype == true) {
+        return $this->_structure->subtype;
+        if (isset($this->_structure->subtype)) {
             return $this->_structure->subtype;
         } else {
             return '';
@@ -166,7 +175,12 @@ class Odimail_Message_Part
      */
     public function getRawContent()
     {
-        // TODO
+        if ($this->_rawContent == null) {
+            $this->_rawContent = imap_fetchbody($this->_connection->getStream()
+                    , $this->getMessageNumber(), $this->getSection());
+        }
+        
+        return $this->_rawContent;
     }
     
     /**
@@ -205,6 +219,37 @@ class Odimail_Message_Part
     }
     
     /**
+     * Return the number of parts
+     * 
+     * @return int
+     */
+    public function countParts() 
+    {
+        return count($this->_structure->parts);    
+    }
+    
+    /**
+     * 
+     * @param int $partNumber
+     * 
+     * @return Odimail_Message_Part
+     */
+    public function getPart($partNumber)
+    {
+        $partNumber = (int) $partNumber;
+        if ($partNumber > 0 && $partNumber <= $this->countParts()) {
+            if ($this->_section == '') {
+                $section = $partNumber;
+            } else {
+                $section = $this->_section . '.' . $partNumber;
+            }
+            
+            return new Odimail_Message_Part($this->getConnection()
+                                , $this->getMessageNumber(), $section);
+        }
+    }
+    
+    /**
      * Gets the size of the message-part before it is decoded
      * 
      * @return int
@@ -226,6 +271,36 @@ class Odimail_Message_Part
         }
         
         return $this->_decodedContentLength;
+    }
+    
+	/**
+     * Gets the message number
+     * 
+     * @return int
+     */
+    public function getMessageNumber()
+    {
+        return $this->_messageNo;
+    }
+    
+    /**
+     * Gets an stream as the returned by the imap_open function
+     * 
+     * @return Odimail_Connection
+     */
+    public function getConnection()
+    {
+        return $this->_connection;
+    }
+    
+    /**
+     * Gets the section of the message part
+     * 
+     * @return string
+     */
+    public function getSection()
+    {
+        return $this->_section;
     }
     
     /**

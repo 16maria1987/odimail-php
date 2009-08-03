@@ -80,7 +80,7 @@ class Odimail_Connection
      * 
      * @return Odimail_Connection
      */
-    public function __construct(array $config)
+    public function __construct(array $config = array())
     {
         $this->_setup($config);
     }
@@ -155,7 +155,8 @@ class Odimail_Connection
         $this->_setup($config);
         
         try {
-            $this->_stream = imap_open($this->_buildMailboxString(), $this->_user, $this->_password);
+            $this->_stream = imap_open($this->_buildMailboxString()
+                        , $this->_user, $this->_password);
             $this->openMailbox($this->_mailbox);            
             return true;
             
@@ -176,7 +177,8 @@ class Odimail_Connection
     }
         
     /**
-     * Gets all of the IMAP errors (if any) that have occurred during this page request
+     * Gets all of the IMAP errors (if any) that have occurred 
+     * during this page request
      * 
      * @return array
      */
