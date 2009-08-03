@@ -80,21 +80,11 @@ class Odimail_Message extends Odimail_Message_Part
      */
     public function __construct($connection, $messageNo, $mailbox)
     {
-        parent::__constuct($connection, $messageNo, '');
+        parent::__construct($connection, $messageNo, '');
         $this->_mailbox = $mailbox;      
         $this->_proccessHeaders();
     }
-    
-    /**
-     * Gets the message number
-     * 
-     * @return int
-     */
-    public function getMessageNumber()
-    {
-        return $this->_messageNo;
-    }
-    
+        
     /**
      * Gets the mailbox name of this message
      * 
@@ -128,20 +118,30 @@ class Odimail_Message extends Odimail_Message_Part
     /**
      * Gets a collection with all contacts in the To header
      * 
-     * @return array
+     * @param int $index
+     * @return Odimail_Contact | array
      */
-    public function getTo()
+    public function getTo($index = null)
     {
+        if (null !== $index && isset($this->_to[$index])) {
+            return $this->_to[$index];
+        }
+        
         return $this->_to; 
     }
     
     /**
      * Gets a collection with all contacts in the Cc header
      * 
-     * @return array
+     * @param int $index
+     * @return Odimail_Contact | array
      */
-    public function getCc()
+    public function getCc($index = null)
     {
+        if (null !== $index && isset($this->_cc[$index])) {
+            return $this->_cc[$index];
+        }
+        
         return $this->_cc;    
     }
     
