@@ -98,7 +98,7 @@ class Odimail_Message_Part
         $this->_structure = $struct;
         
         if ($this->_structure->ifparameters == 1) {
-            foreach ($this->_structure->parameters as $key => $value) {
+            foreach ($this->_structure->parameters as $param) {
                 $this->_parameters[$param->attribute] = $param->value;    
             }
         }
