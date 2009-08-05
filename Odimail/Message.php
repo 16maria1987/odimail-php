@@ -169,8 +169,17 @@ class Odimail_Message extends Odimail_Message_Part
      */
     public function getBody()
     {
-        // TODO 
-        return '';
+        if ($this->isMultipart()) {
+            $this->_findBody($this, 'TEXT/HTML');                   
+            
+            if ($this->_body == null) {
+                $this->_findBody($this, 'TEXT/PLAIN');
+            }
+            
+            return $this->_body;   
+        } 
+        
+        return $this->getContent();
     }
     
     /**

@@ -49,7 +49,7 @@ class Odimail_Message_Part
      * 
      * @var string
      */
-    protected $_decodedConent = null;
+    protected $_decodedContent = null;
     
     /**
      * 
@@ -68,7 +68,22 @@ class Odimail_Message_Part
      * @var array
      */
     protected $_parameters = array();
-        
+
+    /**
+     * Array with all the parts found by the getPartsByMimeType function
+     * @see getPartsByMimeType
+     * 
+     * @var array
+     */
+    protected $_foundParts = array();
+    
+    /**
+     * The maximun number of parts that getPartsByMimeType can return
+     * 
+     * @var int
+     */
+    protected $_maxResults = 0;
+    
     /**
      * 
      * @param Odimail_Connection $connection
@@ -191,8 +206,13 @@ class Odimail_Message_Part
     public function getRawContent()
     {
         if ($this->_rawContent == null) {
+            // TODO verify if it works for all cases 
+            $section = $this->getSection();
+            if ($section == '') {
+                $section = '1';
+            }
             $this->_rawContent = imap_fetchbody($this->_connection->getStream()
-                    , $this->getMessageNumber(), $this->getSection());
+                    , $this->getMessageNumber(), $section);
         }
         
         return $this->_rawContent;
@@ -206,32 +226,33 @@ class Odimail_Message_Part
     public function getContent()
     {
         
-        if ($this->_decodedConent == null) {
+        if ($this->_decodedContent == null) {
             $rawContent = $this->getRawContent();
             
             switch ($this->getEncoding()) {
                 case 0: // 7BIT
                 case 1: // 8BIT
-                    $this->_decodedConent = imap_8bit($rawContent);
+                    $this->_decodedContent = imap_8bit($rawContent);
                     break;
                 case 2: // BINARY
-                    $this->_decodedConent = imap_binary($rawContent);
+                    $this->_decodedContent = imap_binary($rawContent);
                     break;
                 case 3: // BASE64
-                    $this->_decodedConent = imap_base64($rawContent);
+                    $this->_decodedContent = imap_base64($rawContent);
                     break;
                 case 4: // QUOTED-PRINTABLE
-                    $this->_decodedConent = quoted_printable_decode($rawContent);
+                    $this->_decodedContent = quoted_printable_decode($rawContent);
                     break;
                 default: // 5 => OTHER
-                    $this->_decodedConent = $rawContent;
+                    $this->_decodedContent = $rawContent;
+                    
             }
             
         }
         
-        $this->_decodedContentLength = strlen($this->_decodedConent);
+        $this->_decodedContentLength = strlen($this->_decodedContent);
         
-        return $this->_decodedConent;
+        return $this->_decodedContent;
     }
     
     /**
@@ -265,6 +286,55 @@ class Odimail_Message_Part
         }
         
         return null;
+    }
+    
+	/**
+     * Returns all parts with the MIME type equal to $mimeType
+     * 
+     * @param string $mimeType
+     * @param string $subtype if it's null only compares MIME type
+     * @param int $maxResults
+     * @return array
+     */
+    public function getPartsByMime($mimeType, $subtype = null, $maxResults = 0)
+    {
+        $this->_foundParts = array();
+        $this->_maxResults = (int) $maxResults;
+        
+        $this->_findPart($this, strtoupper($mimeType), strtoupper($subtype));
+        return $this->_foundParts;
+    }
+       
+    /**
+     * Find parts by MIME type
+     * 
+     * @param Odimail_Message_Part $part
+     * @param string $mimeType
+     * @param string $mimeSubtype
+     * @return void
+     */
+    protected function _findPart($part, $mimeType, $subtype) 
+    {
+        if ($this->_maxResults > 0 && count($this->_foundParts) > $this->_maxResults) {
+            return true;
+        }
+        
+        if ($part->getMimeType() == $mimeType) {
+            if ($subtype === null) {
+                $this->_foundParts[] = $part;
+            } elseif ($subtype == strtoupper($part->getMimeSubtype())) {
+                $this->_foundParts[] = $part;
+            }
+        }
+        
+        for ($i = 1; $i <= $part->countParts(); $i++) {
+            $subpart = $part->getPart($i);
+            if ($this->_findPart($subpart, $mimeType, $subtype)) {
+                break;    
+            }
+        }
+        
+        return false;
     }
     
     /**
@@ -367,6 +437,16 @@ class Odimail_Message_Part
     public function getStructure()
     {
         return $this->_structure;
+    }
+    
+    /**
+     * Return true if it's a multipart message
+     * 
+     * @return bool
+     */
+    public function isMultipart()
+    {
+        return $this->_structure->type == 1;    
     }
     
 }

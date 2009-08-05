@@ -5,7 +5,10 @@ $connection = new Odimail_Connection();
 $connection->open($config);
 
 $section = $_GET['section'];
-$sectionParts = explode('.', $section);
+$sectionParts = array();
+if ($section != '') {
+    $sectionParts = explode('.', $section);
+}
 $msgNum  = $_GET['msgnum'];
 
 $msg  = $connection->getMessage($msgNum);
@@ -24,6 +27,55 @@ foreach($sectionParts as $index) {
 	<h1>Odimail-php</h1>
 	
 	<table border="1">
+	<?php 
+	if ($part instanceof Odimail_Message) {
+	?>    
+	<tr>
+		<td>Subject: </td>
+		<td><?php echo $part->getSubject() ?></td>
+	</tr>
+	<tr>
+		<td>From: </td>
+		<td><?php echo $part->getFrom()->getEmail() ?></td>
+	</tr>    
+	<tr>
+		<td>To: </td>
+		<td>
+		<?php  
+		$to = $part->getTo();
+		foreach ($to as $contact) {
+		    echo $contact->getEmail() . '< ' . $contact->getName() . '><br />';
+		}
+		?>
+		</td>
+	</tr>
+	<tr>
+		<td>Cc: </td>
+		<td>
+		<?php  
+		$cc = $part->getCc();
+		foreach ($cc as $contact) {
+		    echo $contact->getEmail() . '< ' . $contact->getName() . '><br />';
+		}
+		?>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+		Body:
+		<hr />
+		<?php 
+		$body = $part->getBody();
+		if ($part->getBodyCharset() != 'UTF-8') {
+		    $body = utf8_encode($body);
+		} 
+		echo $body;
+		?>
+		</td>
+	</tr>
+	<?php     
+	} 
+	?>
 	<tr>
 		<td>MIME-Type:</td>
 		<td><?php echo $part->getMimeTypeString() ?></td>
@@ -34,7 +86,7 @@ foreach($sectionParts as $index) {
 	</tr>
 	<tr>
 		<td>Section:</td>
-		<td><?php echo $part->getSection() ?></td>
+		<td><?php echo $part->getSection() ?>&nbsp;</td>
 	</tr>
 	</table>
 	

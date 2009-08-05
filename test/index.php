@@ -15,6 +15,11 @@ function showParts(Odimail_Message_Part $part)
         echo "<ol>";
         for ($i = 1; $i <= $part->countParts(); $i++) {
             $subpart = $part->getPart($i);
+            if (false && $subpart->getMimeTypeString() == 'TEXT/HTML') {
+                echo $subpart->getContent();
+                return;
+            }
+            
             showParts($subpart);
         }
         echo "</ol>";
