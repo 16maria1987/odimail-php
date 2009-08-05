@@ -161,27 +161,7 @@ class Odimail_Message extends Odimail_Message_Part
     {
         return $this->_replyTo;
     }
-    
-    /**
-     * Gets the body of the message
-     * 
-     * @return string
-     */
-    public function getBody()
-    {
-        if ($this->isMultipart()) {
-            $this->_findBody($this, 'TEXT/HTML');                   
-            
-            if ($this->_body == null) {
-                $this->_findBody($this, 'TEXT/PLAIN');
-            }
-            
-            return $this->_body;   
-        } 
         
-        return $this->getContent();
-    }
-    
     /**
      * Gets the date of the message
      * 
