@@ -79,6 +79,13 @@ class Odimail_Message extends Odimail_Message_Part
     protected $_attachmentPartMap = array();
     
     /**
+     * Message ID
+     * 
+     * @var string
+     */
+    protected $_messageId = '';
+    
+    /**
      * 
      * @param Odimail_Connection $connection
      * @param int $messageNo
@@ -176,6 +183,16 @@ class Odimail_Message extends Odimail_Message_Part
         return $this->_date;
     }
     
+	/**
+     * Returns the message ID 
+     * 
+     * @return string 
+     */
+    public function getId()
+    {
+        return $this->_messageId;
+    }
+    
     /**
      * Returns the number of attachments
      * 
@@ -234,6 +251,9 @@ class Odimail_Message extends Odimail_Message_Part
         // Subject
         $subject = imap_mime_header_decode($headerInfo->subject);
         $this->_subject = $subject[0]->text;
+        
+        // Message-ID
+        $this->_messageId = $headerInfo->message_id;
         
         // From 
         if (isset($headerInfo->from)) {

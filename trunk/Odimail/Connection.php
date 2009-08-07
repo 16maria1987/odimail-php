@@ -96,29 +96,83 @@ class Odimail_Connection
     }
     
     /**
-     * Gets information on the mailboxes
+     * Gets the list of mailboxes
      * 
+     * @link http://www.php.net/manual/en/function.imap-getmailboxes.php
+     * @param string $pattern
      * @return array
      */
-    public function getMailboxes()
+    public function getMailboxes($pattern = '*')
     {
-        // TODO Mejorar el resultado devuelto
-        return imap_getmailboxes($this->_stream, $this->_buildMailboxString(), '*');
+        $mailboxes = imap_list($this->_stream, $this->_buildMailboxString(false), $pattern);
+        $list = array(); 
+        foreach ($mailboxes as $mailbox){
+            $list[] = substr($mailbox, strpos($mailbox, '}') + 1);
+        }
+        
+        return $list;
+    }
+    
+    /**
+     * Creates a new mailbox
+     * 
+     * @param string $name Name of the new mailbox
+     * @return unknown_type
+     */
+    public function createMailbox($name)
+    {
+        $newMailbox = imap_utf7_encode($this->_buildMailboxString(false) . $name);
+        return @imap_createmailbox($this->getStream(), $newMailbox);
+    }
+    
+    /**
+     * Rename an old mailbox to new mailbox
+     * 
+     * @param string $oldMailbox
+     * @param string $newMailbox
+     * @return bool
+     */
+    public function renameMailbox($oldMailbox, $newMailbox)
+    {
+        $path = $this->_buildMailboxString(false);
+        $oldMailbox = imap_utf7_encode($path . $oldMailbox);
+        $newMailbox = imap_utf7_encode($path . $newMailbox);
+        
+        return @imap_renamemailbox($this->getStream(), $oldMailbox, $newMailbox);
+    }
+    
+    /**
+     * Delete a mailbox
+     * 
+     * @param string $mailbox
+     * @return bool
+     */
+    public function deleteMailbox($mailbox)
+    {
+        $path = $this->_buildMailboxString(false);
+        $mailbox = imap_utf7_encode($path . $mailbox);
+        return @imap_deletemailbox($this->getStream(), $mailbox);
     }
     
     /**
      * Open a mailbox
      * 
      * @param string $mailbox
-     * @return void
+     * @return bool
      */
     public function openMailbox($mailbox) 
     {
-        imap_reopen($this->getStream(), $this->_buildMailboxString());
-        $headers = imap_headers($this->_stream);
+        $path = $this->_buildMailboxString(false);
         
-        // Messages count
-        $this->_messagesCount = count($headers);
+        if (@imap_reopen($this->getStream(), imap_utf7_encode($path . $mailbox))) {
+            $this->_mailbox = $mailbox;
+            $this->_messagesCount = imap_num_msg($this->getStream());
+            return true;
+                
+        } else {
+            return false;
+            
+        }
     }
     
     /**
@@ -137,10 +191,15 @@ class Odimail_Connection
     /**
      * Return the number of messages in the current mailbox
      * 
+     * @param bool $force If it's true, it will re-check the number of messages
      * @return int
      */
-    public function countMessages()
+    public function countMessages($force = false)
     {
+        if ($force == true) {
+            imap_check($this->getStream());
+            $this->_messagesCount = imap_num_msg($this->getStream());
+        }
         return $this->_messagesCount;
     }
     
@@ -173,7 +232,7 @@ class Odimail_Connection
      */
     public function close()
     {
-        imap_close($this->_stream);
+        @imap_close($this->_stream);
     }
         
     /**
@@ -200,15 +259,20 @@ class Odimail_Connection
     /**
      * Builds a string as the needed by the imap_open function
      * 
+     * @param bool $includeMailbox
      * @return string
      */
-    protected function _buildMailboxString()
+    protected function _buildMailboxString($includeMailbox = true)
     {
         $flags = array_merge(array($this->_protocol), $this->_flags);
         $flagsString = implode('/', $flags);
         
         $connectionString = '{' . $this->_host . ':' . $this->_port 
-            . '/' . $flagsString . '}' . $this->_mailbox;
+            . '/' . $flagsString . '}';
+        
+        if ($includeMailbox == true) {
+            $connectionString .= $this->_mailbox;
+        }
                     
         return $connectionString;
     }
