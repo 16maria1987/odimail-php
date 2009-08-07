@@ -7,6 +7,7 @@
  * @author			Juan Odicio Arrieta
  * @link			http://code.google.com/p/odimail-php/ 	
  * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @package			Odimail
  */
 
 class Odimail_Message extends Odimail_Message_Part
@@ -54,30 +55,7 @@ class Odimail_Message extends Odimail_Message_Part
      * @var string
      */
     protected $_date;
-    
-    /**
-     * Number of attachments
-     * 
-     * @var int
-     */
-    protected $_attachmentsCount = null;
-    
-    /**
-     * Array of Odimail_Message_Attachment objects
-     * 
-     * @var array
-     */
-    protected $_attachments = array();
-    
-    /**
-     * Array with a $attachmentNumber-$messagePartNumber mapping
-     * Where:
-     * $attachmentNumber => $messagePartNumber
-     * 
-     * @var array
-     */
-    protected $_attachmentPartMap = array();
-    
+       
     /**
      * Message ID
      * 
@@ -130,10 +108,10 @@ class Odimail_Message extends Odimail_Message_Part
     }
     
     /**
-     * Gets a collection with all contacts in the To header
+     * Gets an array with all contacts in the To header
      * 
      * @param int $index
-     * @return Odimail_Contact | array
+     * @return array | Odimail_Contact
      */
     public function getTo($index = null)
     {
@@ -145,10 +123,10 @@ class Odimail_Message extends Odimail_Message_Part
     }
     
     /**
-     * Gets a collection with all contacts in the Cc header
+     * Gets an array with all contacts in the Cc header
      * 
      * @param int $index
-     * @return Odimail_Contact | array
+     * @return array | Odimail_Contact
      */
     public function getCc($index = null)
     {
@@ -194,51 +172,17 @@ class Odimail_Message extends Odimail_Message_Part
     }
     
     /**
-     * Returns the number of attachments
+     * Mark a message for deletion from current mailbox. Messages marked for deletion 
+     * will stay in the mailbox until Odimail_Connection::expunge() is called
      * 
-     * @return int
+     * @see Odimail_Connection::expunge()
+     * @return bool
      */
-    public function countAttachments()
+    public function delete()
     {
-        if ($this->_attachmentsCount == null) {
-            $this->_attachmentsCount = 0;
-            
-            $cont = 0;
-            
-            if ($this->countParts() > 0) {
-                for ($i = 1; $i <= $this->countParts(); $i++) {
-                    $part = $this->getPart($i);
-                    
-                    if ($part->hasParameter('filename')) {
-                        $cont += 1;
-                        $attachment = new Odimail_Message_Attachment($this->_connection,
-                                        $this->getMessageNumber(), $i);
-                                        
-                        $this->_attachments[$cont] = $attachment; 
-                    }
-                }
-            }
-            
-        }
-        
-        return $this->_attachmentsCount;
+        return @imap_delete($this->_connection->getStream(), $this->getMessageNumber());
     }
-    
-    /**
-     * Returns an attachment
-     * 
-     * @param int $attachmentNo
-     * @return Odimail_Message_Attachment
-     */
-    public function getAttachment($attachmentNo)
-    {
-        if ($attachmentNo <= $this->countAttachments() && $attachmentNo != 0) {
-            $partNumber = $this->_attachmentPartMap[$attachmentNo];
-            $attachment = new Odimail_Message_Attachment($this, $this->_structure->parts[$partNumber], $partNumber);
-            return $attachment;
-        }
-    }
-    
+       
     /**
      * Proccess the headers of the message
      * 
@@ -288,5 +232,6 @@ class Odimail_Message extends Odimail_Message_Part
         $this->_date = $headerInfo->udate;
         
     }
+    
     
 }

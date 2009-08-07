@@ -7,6 +7,7 @@
  * @author			Juan Odicio Arrieta
  * @link			http://code.google.com/p/odimail-php/ 	
  * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @package			Odimail
  */
 
 class Odimail_Message_Part
@@ -33,7 +34,7 @@ class Odimail_Message_Part
     protected $_messageNo = 0;
 
     /**
-     * Section of the message
+     * Section of the message (Format "1.1" , "1.2.1", etc)
      * 
      * @var string
      */
@@ -187,9 +188,8 @@ class Odimail_Message_Part
     }
     
     /**
-     * Gets the enconding
-     * 0 => 7BIT, 1 => 8BIT, 2 => BINARY
-     * 3 => BASE64, 4 => QUOTED-PRINTABLE, 5 => OTHER
+     * Gets the enconding: 0 => 7BIT, 1 => 8BIT, 2 => BINARY, 3 => BASE64
+     * , 4 => QUOTED-PRINTABLE, 5 => OTHER
      * 
      * @return int
      */
@@ -262,13 +262,13 @@ class Odimail_Message_Part
      */
     public function countParts() 
     {
-        return count($this->_structure->parts);    
+        return count($this->_structure->parts);
     }
     
     /**
+     * Gets an Odimail_Message_Part
      * 
      * @param int $partNumber
-     * 
      * @return Odimail_Message_Part
      */
     public function getPart($partNumber)
@@ -430,8 +430,8 @@ class Odimail_Message_Part
     /**
      * Return an object with the same structure as the object 
      * returned by the imap_fetchstructure function
-     * @link http://www.php.net/manual/en/function.imap-fetchstructure.php
      * 
+     * @link http://www.php.net/manual/en/function.imap-fetchstructure.php
      * @return object
      */
     public function getStructure()

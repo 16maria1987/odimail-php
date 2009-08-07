@@ -7,6 +7,7 @@
  * @author			Juan Odicio Arrieta
  * @link			http://code.google.com/p/odimail-php/ 	
  * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @package			Odimail
  */
 
 class Odimail_Connection 
@@ -38,7 +39,6 @@ class Odimail_Connection
      * @var int
      */
     protected $_port = 143;
-    
     
     /**
      * Protocol to use. It can be 'imap' or 'pop3'
@@ -77,7 +77,6 @@ class Odimail_Connection
     /**
      * 
      * @param array $config
-     * 
      * @return Odimail_Connection
      */
     public function __construct(array $config = array())
@@ -117,7 +116,7 @@ class Odimail_Connection
      * Creates a new mailbox
      * 
      * @param string $name Name of the new mailbox
-     * @return unknown_type
+     * @return bool
      */
     public function createMailbox($name)
     {
@@ -299,8 +298,16 @@ class Odimail_Connection
         
     }
     
+    /**
+     * Delete all messages marked for deletion
+     * 
+     * @return bool
+     */
+    public function expunge()
+    {
+        return @imap_expunge($this->getStream());    
+    }
+    
     
 }
-
-
 

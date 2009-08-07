@@ -7,6 +7,7 @@
  * @author			Juan Odicio Arrieta
  * @link			http://code.google.com/p/odimail-php/ 	
  * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @package			Odimail
  */
 
 class Odimail_Contact 
