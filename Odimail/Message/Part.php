@@ -72,8 +72,8 @@ class Odimail_Message_Part
 
     /**
      * Array with all the parts found by the getPartsByMimeType function
-     * @see getPartsByMimeType
      * 
+     * @see Odimail_Message_Part::getPartsByMimeType()
      * @var array
      */
     protected $_foundParts = array();
@@ -92,6 +92,7 @@ class Odimail_Message_Part
      */
     protected $_maxResults = 0;
     
+    
     /**
      * 
      * @param Odimail_Connection $connection
@@ -106,7 +107,7 @@ class Odimail_Message_Part
         $this->_section    = $section;
         
         $struct = imap_fetchstructure($connection->getStream(), $messageNo);
-        
+       
         if ($section !== '') {
             $sectionParts = explode('.', $section);   
              
@@ -337,7 +338,7 @@ class Odimail_Message_Part
         for ($i = 1; $i <= $part->countParts(); $i++) {
             $subpart = $part->getPart($i);
             if ($this->_findPart($subpart, $mimeType, $subtype)) {
-                break;    
+                break;
             }
         }
         
@@ -357,7 +358,7 @@ class Odimail_Message_Part
     public function searchParts($callback, $maxResults = 0) 
     {
         if (false == is_callable($callback)) {
-            throw new Exception('The supplied callback is not a valid function');
+            throw new Exception('Invalid callback');
         }
         
         $this->_searchResults = array();
@@ -415,7 +416,7 @@ class Odimail_Message_Part
     public function getSize()
     {
         if ($this->_decodedContentLength == null) {
-            $this->getContent();    
+            $this->getContent();
         }
         
         return $this->_decodedContentLength;
@@ -430,7 +431,7 @@ class Odimail_Message_Part
     {
         return $this->_messageNo;
     }
-    
+        
     /**
      * Gets an stream as the returned by the imap_open function
      * 
