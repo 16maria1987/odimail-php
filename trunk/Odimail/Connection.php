@@ -8,6 +8,7 @@
  * @link			http://code.google.com/p/odimail-php/ 	
  * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
  * @package			Odimail
+ * @version			$Id$
  */
 
 class Odimail_Connection 
@@ -206,7 +207,7 @@ class Odimail_Connection
      * Opens an IMAP stream to a mailbox
      * @param array $config
      * 
-     * @return resource
+     * @return bool
      */
     public function open(array $config = array())
     {
@@ -253,6 +254,16 @@ class Odimail_Connection
     public function getStream()
     {
         return $this->_stream; 
+    }
+    
+    /**
+     * Gets the protocol
+     * 
+     * @return string
+     */
+    public function getProtocol()
+    {
+        return $this->_protocol;    
     }
     
     /**

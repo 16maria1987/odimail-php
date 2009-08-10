@@ -55,14 +55,7 @@ class Odimail_Message extends Odimail_Message_Part
      * @var string
      */
     protected $_date;
-       
-    /**
-     * Message ID
-     * 
-     * @var string
-     */
-    protected $_messageId = '';
-    
+  
     /**
      * 
      * @param Odimail_Connection $connection
@@ -73,7 +66,7 @@ class Odimail_Message extends Odimail_Message_Part
     public function __construct($connection, $messageNo, $mailbox)
     {
         parent::__construct($connection, $messageNo, '');
-        $this->_mailbox = $mailbox;      
+        $this->_mailbox = $mailbox;
         $this->_proccessHeaders();
     }
         
@@ -161,16 +154,6 @@ class Odimail_Message extends Odimail_Message_Part
         return $this->_date;
     }
     
-	/**
-     * Returns the message ID 
-     * 
-     * @return string 
-     */
-    public function getId()
-    {
-        return $this->_messageId;
-    }
-    
     /**
      * Mark a message for deletion from current mailbox. Messages marked for deletion 
      * will stay in the mailbox until Odimail_Connection::expunge() is called
@@ -197,7 +180,7 @@ class Odimail_Message extends Odimail_Message_Part
         $this->_subject = $subject[0]->text;
         
         // Message-ID
-        $this->_messageId = $headerInfo->message_id;
+        $this->_messageUID = imap_uid($this->getConnection()->getStream(), $this->getMessageNumber());
         
         // From 
         if (isset($headerInfo->from)) {
