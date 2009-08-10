@@ -79,6 +79,13 @@ class Odimail_Message_Part
     protected $_foundParts = array();
     
     /**
+     * Array with all the results from the searchParts function
+     * 
+     * @var array
+     */
+    protected $_searchResults = array();
+    
+    /**
      * The maximun number of parts that getPartsByMimeType can return
      * 
      * @var int
@@ -333,6 +340,59 @@ class Odimail_Message_Part
                 break;    
             }
         }
+        
+        return false;
+    }
+    
+    /**
+     * Search parts using a user-defined comparison function.
+     * The user-defined function must have the following signature:
+     * bool function comparisonFunctionName(Odimail_Message_part $part)
+     * 
+     * @link http://www.php.net/manual/en/language.pseudo-types.php#language.types.callback
+     * @param callback $callback
+     * @param int $maxResults
+     * @return array
+     */
+    public function searchParts($callback, $maxResults = 0) 
+    {
+        if (false == is_callable($callback)) {
+            throw new Exception('The supplied callback is not a valid function');
+        }
+        
+        $this->_searchResults = array();
+        $this->_maxResults = (int) $maxResults;
+        $this->_recursiveSearch($this, $callback);
+        
+        return $this->_searchResults;
+    }
+    
+    /**
+     * 
+     * @param Odimail_Message_Part $part
+     * @param callback $callback
+     * @return void
+     */
+    protected function _recursiveSearch($part, $callback) 
+    {
+        if ($this->_maxResults > 0 && count($this->_searchResults) > $this->_maxResults) {
+            return true;
+        }
+        
+        if (false == ($part instanceof Odimail_Message_Part)) {
+            throw new Exception('$part is not a valid Odimail_Message_Part object');
+        }
+        
+        if (is_callable($callback)) {
+            if (call_user_func($callback, $part)) {
+                $this->_searchResults[] = $part;
+            }
+            
+            $partsCount = $part->countParts();
+            for ($i = 1; $i <= $partsCount; $i++) {
+                $this->_recursiveSearch($part->getPart($i), $callback);
+            }
+        } 
         
         return false;
     }
