@@ -92,7 +92,6 @@ class Odimail_Message_Part
      */
     protected $_maxResults = 0;
     
-    
     /**
      * 
      * @param Odimail_Connection $connection
@@ -399,6 +398,34 @@ class Odimail_Message_Part
     }
     
     /**
+     * Returns all attached and embedded files.
+     * If it has the parameters "filename" and "name" then it's an attached file
+     * If it only has the parameter "name" then it's an embedded file.
+     * Note. If you only need the attached files, you can use the function 
+     * hasParameter to verify the existence of the parameter "filename"
+     * 
+     * @return array
+     */
+    public function getAttachments()
+    {
+        $this->_searchResults = array();
+        $this->_maxResults = 0;
+        $this->_recursiveSearch($this, 'Odimail_Message_Part::isFile');
+        return $this->_searchResults;
+    }
+    
+    /**
+     * Return true if $part is a file
+     * 
+     * @param Odimail_Message_Part $part
+     * @return bool
+     */
+    static function isFile($part)
+    {
+        return $part->hasParameter('filename') || $part->hasParameter('name');
+    }
+    
+    /**
      * Gets the size of the message-part before it is decoded
      * 
      * @return int
@@ -508,6 +535,21 @@ class Odimail_Message_Part
     public function isMultipart()
     {
         return $this->_structure->type == 1;    
+    }
+    
+    /**
+     * Write the content to a file
+     * 
+     * @param string $path
+     * @return int
+     */
+    public function save($path)
+    {
+        try {
+            return file_put_contents($path, $this->getContent());
+        } catch (Exception $ex) {
+            return false;
+        }
     }
     
 }

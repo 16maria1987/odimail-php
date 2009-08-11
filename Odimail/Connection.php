@@ -8,7 +8,6 @@
  * @link			http://code.google.com/p/odimail-php/ 	
  * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
  * @package			Odimail
- * @version			$Id$
  */
 
 class Odimail_Connection 
@@ -98,7 +97,7 @@ class Odimail_Connection
     /**
      * Gets the list of mailboxes
      * 
-     * @link http://www.php.net/manual/en/function.imap-getmailboxes.php
+     * @link http://www.php.net/manual/en/function.imap-list.php
      * @param string $pattern
      * @return array
      */
@@ -177,8 +176,8 @@ class Odimail_Connection
     
     /**
      * Gets the message in position $messageNo
-     * @param int $messageNo
      * 
+     * @param int $messageNo
      * @return Odimail_Message
      */
     public function getMessage($messageNo)
@@ -205,8 +204,8 @@ class Odimail_Connection
     
     /**
      * Opens an IMAP stream to a mailbox
-     * @param array $config
      * 
+     * @param array $config
      * @return bool
      */
     public function open(array $config = array())
@@ -243,7 +242,7 @@ class Odimail_Connection
      */
     public function getErrors() 
     {
-        return imap_errors();    
+        return imap_errors();
     }
     
     /**
@@ -318,7 +317,6 @@ class Odimail_Connection
     {
         return @imap_expunge($this->getStream());    
     }
-    
     
 }
 
