@@ -86,7 +86,7 @@ class Odimail_Message_Part
     protected $_searchResults = array();
     
     /**
-     * The maximun number of parts that getPartsByMimeType can return
+     * The maximun number of search results
      * 
      * @var int
      */
