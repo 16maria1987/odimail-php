@@ -63,7 +63,10 @@ $mailboxes = $connection->getMailboxes();
 			?>
 			<tr class="<?php echo $rowClass ?>">
 				<td><?php echo $message->getFrom()->getEmail() ?></td>
-				<td><?php echo $message->getSubject() ?></td>
+				<td>
+					<a target="_blank" href="showMessage.php?mbox=<?php echo $currentMailbox ?>&amp;msg=<?php echo $msgInd ?>">
+				    <?php echo $message->getSubject() ?></a>
+				</td>
 				<td><?php echo $message->getDate('Y-m-d') ?></td>
 			</tr>
 			<?php

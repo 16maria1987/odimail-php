@@ -60,3 +60,8 @@ tr.even td {
 	text-align: center;
 	font-size: 90%;
 }
+
+.email {
+	border: 1px solid #EDF5FF;
+	padding: 1px 4px;
+}
