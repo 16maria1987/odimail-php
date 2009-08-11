@@ -178,10 +178,7 @@ class Odimail_Message extends Odimail_Message_Part
         // Subject
         $subject = imap_mime_header_decode($headerInfo->subject);
         $this->_subject = $subject[0]->text;
-        
-        // Message-ID
-        $this->_messageUID = imap_uid($this->getConnection()->getStream(), $this->getMessageNumber());
-        
+
         // From 
         if (isset($headerInfo->from)) {
             $this->_from = new Odimail_Contact($headerInfo->from[0]);

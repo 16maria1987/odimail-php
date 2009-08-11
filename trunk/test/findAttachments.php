@@ -36,11 +36,14 @@ function searchHtml(Odimail_Message_Part $part) {
         <li><?php echo $msg->getSubject() ?>
             <ol>
             <?php
-            $attachments = $msg->searchParts('searchAttachments'); 
-            foreach ($attachments as $part) { ?>
+            $attachments = $msg->getAttachments(); 
+            foreach ($attachments as $part) { 
+                //if (!$part->hasParameter('filename')) continue;
+                $part->save('./' . $part->getParameter('name'));
+            ?>	
             	<li>
             	<?php echo '<a target="_blank" href="showContent.php?msgnum=' . $part->getMessageNumber(). '&amp;section=' . $part->getSection() . '">'; ?>
-            	<?php echo $part->getParameter('filename') . ' - ' . $part->getSection() . '</a>' ?>
+            	<?php echo $part->getParameter('name') . ' - ' . $part->getSection() . '</a>' ?>
             	</li>
             <?php 
             }

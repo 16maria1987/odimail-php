@@ -4,6 +4,16 @@ include_once 'config.php';
 $connection = new Odimail_Connection();
 $connection->open($config);
 
+for ($i = 1; $i <= $connection->countMessages(); $i++) {
+    $message = $connection->getMessage($i);
+    
+    echo 'Subject: ' . $message->getSubject() . '<br />';
+    echo 'From: ' . $message->getFrom()->getEmail() . '<br />';
+    echo 'To: ' . $message->getTo(0)->getEmail() . '<br />';
+    echo '<hr />';
+}
+exit;
+
 function showParts(Odimail_Message_Part $part)
 {
     echo "<li>";
