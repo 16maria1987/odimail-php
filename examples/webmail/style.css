@@ -1,0 +1,62 @@
+body {
+	font-family: "trebuchet ms",arial,helvetica,clean,sans-serif;
+	font-size: 80%;
+}
+
+
+#page {
+	width: 850px;
+	border: 1px solid #ccc;
+	margin: 10px auto;
+}
+
+#folders-panel {
+	width: 20%;
+	float: left;	
+}
+
+#messages-panel {
+	width: 79%;
+	float: right;
+}
+
+.margin {
+	margin: 10px;
+}
+
+.paginator {
+	text-align: right;
+}
+
+.messages-list {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.messages-list tr th {
+	text-align: left;
+}
+
+.messages-list tr td , .messages-list tr th{
+	border: 1px solid #9F9F9F;
+	padding: 3px;
+}
+
+tr.odd td {
+	background-color: #EDF5FF;	
+}
+
+tr.even td {
+	background-color: #fff;
+}
+
+#hd {
+	
+}
+
+#ft {
+	clear: both;
+	margin-top: 20px;
+	text-align: center;
+	font-size: 90%;
+}
