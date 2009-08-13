@@ -3,12 +3,15 @@ include_once 'config.php';
 
 $connection = new Odimail_Connection();
 
-$pageSize = 5;
+$pageSize = 10;
 $currentMailbox = isset($_GET['mbox']) ? $_GET['mbox'] : 'INBOX';
 $currentPage    = isset($_GET['page']) ? $_GET['page'] : 1;
+$sort    = isset($_GET['sort']) ? $_GET['sort'] : 1;
 
 $config['mailbox'] = $currentMailbox;
 $connection->open($config);
+
+$connection->sort($sort, Odimail_Connection::SORT_DIR_ASC);
 
 $messagesCount = $connection->countMessages();
 $pagesCount    = ceil($messagesCount / $pageSize);
@@ -45,15 +48,15 @@ $mailboxes = $connection->getMailboxes();
 			
 			<div class="paginator">
 				<?php for ($i = 1; $i <= $pagesCount; $i++){ ?>
-					<a href="index.php?mailbox=<?php echo $currentMailbox?>&amp;page=<?php echo $i ?>"><?php echo $i ?></a>
+					<a href="index.php?mailbox=<?php echo $currentMailbox?>&amp;page=<?php echo $i ?>&amp;sort=<?php echo $sort ?>"><?php echo $i ?></a>
 				<?php } ?>
 			</div>
 			
 			<table class="messages-list">
 			<tr>
-				<th>From</th>
-				<th>Subject</th>
-				<th>Date</th>
+				<th><a href="index.php?mbox=<?php echo $currentMailbox ?>&amp;sort=2">From</a></th>
+				<th><a href="index.php?mbox=<?php echo $currentMailbox ?>&amp;sort=3">Subject</a></th>
+				<th><a href="index.php?mbox=<?php echo $currentMailbox ?>&amp;sort=0">Date</a></th>
 			</tr>
 			<?php 
 			$odd = false;
@@ -85,6 +88,14 @@ $mailboxes = $connection->getMailboxes();
 				<li><a href="index.php?mailbox=<?php echo $mailbox ?>"><?php echo $mailbox ?></a></li>
 			<?php } ?>
 			</ul>
+			
+			<form method="post" action="">
+				<h3>Add new folder</h3>
+				
+				<input type="text" name="mailbox" size="15" />
+				<input type="submit" name="create" value="+" 
+					title="Create folder" />
+			</form>
 		
 		</div>	
 

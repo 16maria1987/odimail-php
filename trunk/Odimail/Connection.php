@@ -13,6 +13,16 @@
 class Odimail_Connection 
 {
     
+    const SORT_DATE     = 0;
+    const SORT_ARRIVAL  = 1;
+    const SORT_FROM     = 2;
+    const SORT_SUBJECT  = 3;
+    const SORT_TO       = 4;
+    const SORT_CC       = 5;
+    const SORT_SIZE     = 6;
+    const SORT_DIR_ASC  = 0;
+    const SORT_DIR_DESC = 1;
+    
     /**
      * Number of messages in the current mailbox
      * 
@@ -73,6 +83,22 @@ class Odimail_Connection
      * @var array
      */
     protected $_flags = array();
+    
+    
+    /**
+     * 
+     * @var string
+     */
+    protected $_sortField = self::SORT_ARRIVAL;
+    
+    /**
+     * 
+     * @var int
+     */
+    protected $_sortDir   = self::SORT_DIR_ASC;
+    
+    
+    protected $_sortedIndex = array();
     
     /**
      * 
@@ -154,17 +180,44 @@ class Odimail_Connection
     }
     
     /**
+     * Sort the messages
+     * 
+     * @param $sortField
+     * @param $sortDir
+     * @return void
+     */
+    public function sort($sortField, $sortDir = self::SORT_DIR_ASC)
+    {
+        if ($sortDir == $this->_sortDir && $sortField == $this->_sortField) {
+            return true;
+        }
+        
+        $ret = @imap_sort($this->getStream(), $sortField, $sortDir);
+        if ($ret) {
+            $this->_sortedIndex = $ret;
+            $this->_sortField = $sortField;
+            $this->_sortDir   = $sortDir;
+        }
+    }
+    
+    /**
      * Open a mailbox
      * 
      * @param string $mailbox
+     * @param int $sortField
+     * @param int $sortDir
      * @return bool
      */
-    public function openMailbox($mailbox) 
+    public function openMailbox($mailbox, $sortField = null, $sortDir = null) 
     {
         $path = $this->_buildMailboxString(false);
         
         if (@imap_reopen($this->getStream(), imap_utf7_encode($path . $mailbox))) {
             $this->_mailbox = $mailbox;
+            $sortField = ($sortField == null) ? $this->_sortField : $sortField;
+            $sortDir   = ($sortDir   == null) ? $this->_sortDir : $sortDir;
+            
+            $this->sort($sortField, $sortDir);
             $this->_messagesCount = imap_num_msg($this->getStream());
             return true;
                 
@@ -183,6 +236,7 @@ class Odimail_Connection
     public function getMessage($messageNo)
     {
         if ($messageNo > 0 && $messageNo <= $this->_messagesCount) {
+            $messageNo = $this->_sortedIndex[$messageNo];
             return new Odimail_Message($this, $messageNo, $this->_mailbox);
         }
     }
@@ -252,7 +306,7 @@ class Odimail_Connection
      */
     public function getStream()
     {
-        return $this->_stream; 
+        return $this->_stream;
     }
     
     /**
@@ -262,7 +316,7 @@ class Odimail_Connection
      */
     public function getProtocol()
     {
-        return $this->_protocol;    
+        return $this->_protocol;
     }
     
     /**
@@ -317,6 +371,37 @@ class Odimail_Connection
     {
         return @imap_expunge($this->getStream());    
     }
+    
+    /**
+     * 
+     * @param mixed $message It can be the message number or an Odimail_Message object
+     * @param string $mailbox 
+     * @return bool
+     */
+    public function copy($message, $mailbox)
+    {
+        if ($message instanceof Odimail_Message) {
+            $message = $message->getMessageNumber();
+        } 
+        
+        return @imap_mail_copy($this->getStream(), $message, $mailbox);
+    }
+    
+    /**
+     * 
+     * @param mixed $message It can be the message number or an Odimail_Message object
+     * @param string $mailbox
+     * @return bool
+     */
+    public function move($message, $mailbox) 
+    {
+        if ($message instanceof Odimail_Message) {
+            $message = $message->getMessageNumber();
+        }
+        
+        return @imap_mail_move($this->getStream(), $message, $mailbox);
+    }
+    
     
 }
 

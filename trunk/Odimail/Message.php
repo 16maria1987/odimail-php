@@ -213,5 +213,4 @@ class Odimail_Message extends Odimail_Message_Part
         
     }
     
-    
 }
