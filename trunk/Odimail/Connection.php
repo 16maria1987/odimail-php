@@ -188,16 +188,25 @@ class Odimail_Connection
      */
     public function sort($sortField, $sortDir = self::SORT_DIR_ASC)
     {
-        if ($sortDir == $this->_sortDir && $sortField == $this->_sortField) {
+        /*
+        if ($sortDir == $this->_sortDir && $sortField == $this->_sortField
+            && $this->_messagesCount == count($this->_sortedIndex)) {
             return true;
         }
+        */
         
-        $ret = @imap_sort($this->getStream(), $sortField, $sortDir);
-        if ($ret) {
-            $this->_sortedIndex = $ret;
-            $this->_sortField = $sortField;
-            $this->_sortDir   = $sortDir;
+        if ($sortField == self::SORT_ARRIVAL) {
+            // This is a performance improvement. 
+            // it avoids to make a call to imap_sort()
+            $min = ($sortDir == self::SORT_DIR_ASC) ? 1 : $this->_messagesCount;
+            $max = ($sortDir == self::SORT_DIR_ASC) ? $this->_messagesCount : 1;
+            $this->_sortedIndex = range($min, $max);
+            
+        } else {
+            $ret = @imap_sort($this->getStream(), $sortField, $sortDir);
+            $this->_sortedIndex = $ret;    
         }
+        
     }
     
     /**
@@ -215,7 +224,7 @@ class Odimail_Connection
         if (@imap_reopen($this->getStream(), imap_utf7_encode($path . $mailbox))) {
             $this->_mailbox = $mailbox;
             $sortField = ($sortField == null) ? $this->_sortField : $sortField;
-            $sortDir   = ($sortDir   == null) ? $this->_sortDir : $sortDir;
+            $sortDir   = ($sortDir   == null) ? $this->_sortDir   : $sortDir;
             
             $this->sort($sortField, $sortDir);
             $this->_messagesCount = imap_num_msg($this->getStream());
@@ -235,8 +244,8 @@ class Odimail_Connection
      */
     public function getMessage($messageNo)
     {
-        if ($messageNo > 0 && $messageNo <= $this->_messagesCount) {
-            $messageNo = $this->_sortedIndex[$messageNo];
+        if ($messageNo >= 0 && $messageNo <= $this->_messagesCount) {
+            $messageNo = $this->_sortedIndex[$messageNo - 1];
             return new Odimail_Message($this, $messageNo, $this->_mailbox);
         }
     }
@@ -269,6 +278,7 @@ class Odimail_Connection
         try {
             $this->_stream = imap_open($this->_buildMailboxString()
                         , $this->_user, $this->_password);
+   
             $this->openMailbox($this->_mailbox);            
             return true;
             

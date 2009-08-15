@@ -4,16 +4,6 @@ include_once 'config.php';
 $connection = new Odimail_Connection();
 $connection->open($config);
 
-for ($i = 1; $i <= $connection->countMessages(); $i++) {
-    $message = $connection->getMessage($i);
-    
-    echo 'Subject: ' . $message->getSubject() . '<br />';
-    echo 'From: ' . $message->getFrom()->getEmail() . '<br />';
-    echo 'To: ' . $message->getTo(0)->getEmail() . '<br />';
-    echo '<hr />';
-}
-exit;
-
 function showParts(Odimail_Message_Part $part)
 {
     echo "<li>";
@@ -52,7 +42,23 @@ function showParts(Odimail_Message_Part $part)
 	for ($i = 1; $i <= $connection->countMessages(); $i++) {
         $msg = $connection->getMessage($i);
         showParts($msg);
+        if ($i == 16) {
+            echo "<pre>";
+            print_r($msg->getStructure());
+            echo "</pre>";
+            
+            $msg->searchParts('savePart');
+        }
     }
+    
+    function savePart(Odimail_Message_Part $part) {
+        $part->save('./parts/' . $part->getSection() . '.txt');
+        
+        $content = print_r($part->getStructure(), true);
+        file_put_contents('./parts/struct_' . $part->getSection() . '.txt', $content);
+        return false;
+    }
+    
 	?>
 	</ol>
 
