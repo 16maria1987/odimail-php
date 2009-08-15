@@ -4,7 +4,7 @@ include_once 'config.php';
 $connection = new Odimail_Connection();
 
 $pageSize = 10;
-$currentMailbox = isset($_GET['mbox']) ? $_GET['mbox'] : 'INBOX';
+$currentMailbox = isset($_GET['mbox']) ? $_GET['mbox'] : 'SENT';
 $currentPage    = isset($_GET['page']) ? $_GET['page'] : 1;
 $sort    = isset($_GET['sort']) ? $_GET['sort'] : 1;
 
@@ -32,6 +32,7 @@ $mailboxes = $connection->getMailboxes();
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<link href="style.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="js/jquery-1.3.2.min.js"></script>
 	
 	<title>Webmail</title>
 </head>
@@ -54,6 +55,7 @@ $mailboxes = $connection->getMailboxes();
 			
 			<table class="messages-list">
 			<tr>
+				<th><input type="checkbox" id="selectAll" title="Select All" /></th>
 				<th><a href="index.php?mbox=<?php echo $currentMailbox ?>&amp;sort=2">From</a></th>
 				<th><a href="index.php?mbox=<?php echo $currentMailbox ?>&amp;sort=3">Subject</a></th>
 				<th><a href="index.php?mbox=<?php echo $currentMailbox ?>&amp;sort=0">Date</a></th>
@@ -65,6 +67,7 @@ $mailboxes = $connection->getMailboxes();
 			    $rowClass = ($odd) ? 'odd' : 'even'; 
 			?>
 			<tr class="<?php echo $rowClass ?>">
+				<td><input type="checkbox" name="selected[]" value="<?php echo $msgInd ?>" /></td>
 				<td><?php echo $message->getFrom()->getEmail() ?></td>
 				<td>
 					<a target="_blank" href="showMessage.php?mbox=<?php echo $currentMailbox ?>&amp;msg=<?php echo $msgInd ?>">
@@ -85,7 +88,7 @@ $mailboxes = $connection->getMailboxes();
 			
 			<ul>
 			<?php foreach ($mailboxes as $mailbox) { ?>
-				<li><a href="index.php?mailbox=<?php echo $mailbox ?>"><?php echo $mailbox ?></a></li>
+				<li><a href="index.php?mbox=<?php echo $mailbox ?>"><?php echo $mailbox ?></a></li>
 			<?php } ?>
 			</ul>
 			

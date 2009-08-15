@@ -8,6 +8,6 @@ $config = array(
     'user' => 'dexter',
     'password' => '123456',
     'host' => 'mail.one-src.com',
-    'mailbox' => 'INBOX',
+    'mailbox' => 'SENT',
     'flags' => array('notls')
 );
