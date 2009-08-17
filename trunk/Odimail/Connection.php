@@ -244,10 +244,26 @@ class Odimail_Connection
      */
     public function getMessage($messageNo)
     {
-        if ($messageNo >= 0 && $messageNo <= $this->_messagesCount) {
+        if ($messageNo > 0 && $messageNo <= $this->_messagesCount) {
             $messageNo = $this->_sortedIndex[$messageNo - 1];
             return new Odimail_Message($this, $messageNo, $this->_mailbox);
         }
+    }
+    
+    /**
+     * Deletes a message in the given position 
+     * 
+     * @param int $messageNo It can be the 
+     * @return bool
+     */
+    public function deleteMessage($messageNo) 
+    {
+        if ($messageNo > 0 && $messageNo <= $this->_messagesCount) {
+            $messageNo = $this->_sortedIndex[$messageNo - 1];
+            return @imap_delete($this->getStream(), $messageNo);
+        }
+        
+        return false;
     }
     
     /**
@@ -394,7 +410,7 @@ class Odimail_Connection
             $message = $message->getMessageNumber();
         } 
         
-        return @imap_mail_copy($this->getStream(), $message, $mailbox);
+        return @imap_mail_copy($this->getStream(), $message, imap_utf7_encode($mailbox));
     }
     
     /**
@@ -409,7 +425,7 @@ class Odimail_Connection
             $message = $message->getMessageNumber();
         }
         
-        return @imap_mail_move($this->getStream(), $message, $mailbox);
+        return @imap_mail_move($this->getStream(), $message, imap_utf7_encode($mailbox));
     }
     
     
