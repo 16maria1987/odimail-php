@@ -11,6 +11,38 @@ $sort    = isset($_GET['sort']) ? $_GET['sort'] : 1;
 $config['mailbox'] = $currentMailbox;
 $connection->open($config);
 
+$selected = (isset($_POST['selected'])) ? $_POST['selected'] : array();
+$destMbox = (isset($_POST['destMbox'])) ? $_POST['destMbox'] : null;
+
+// Actions
+
+if (isset($_POST['createFolder'])) {
+    $newFolderName = $_POST['newFolderName'];
+    $connection->createMailbox($newFolderName);
+}
+
+if (isset($_POST['move']) && $destMbox != null) {
+    foreach ($selected as $pos) {
+        $connection->move($pos, $destMbox);
+    }
+    $connection->expunge();
+}
+
+if (isset($_POST['copy'])) {
+    foreach ($selected as $pos) {
+        $connection->copy($pos, $destMbox);         
+    }
+}
+
+if (isset($_POST['delete'])) {
+    foreach ($selected as $pos) {
+        $connection->deleteMessage($pos);
+    }
+    $connection->expunge();
+}
+
+
+
 $connection->sort($sort, Odimail_Connection::SORT_DIR_ASC);
 
 $messagesCount = $connection->countMessages();
@@ -24,6 +56,7 @@ if ($numEnd > $messagesCount) {
 }
 
 $mailboxes = $connection->getMailboxes();
+sort($mailboxes, SORT_STRING);
 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
@@ -49,37 +82,54 @@ $mailboxes = $connection->getMailboxes();
 			
 			<div class="paginator">
 				<?php for ($i = 1; $i <= $pagesCount; $i++){ ?>
-					<a href="index.php?mailbox=<?php echo $currentMailbox?>&amp;page=<?php echo $i ?>&amp;sort=<?php echo $sort ?>"><?php echo $i ?></a>
+					<a href="index.php?mbox=<?php echo $currentMailbox?>&amp;page=<?php echo $i ?>&amp;sort=<?php echo $sort ?>"><?php echo $i ?></a>
 				<?php } ?>
 			</div>
 			
-			<table class="messages-list">
-			<tr>
-				<th><input type="checkbox" id="selectAll" title="Select All" /></th>
-				<th><a href="index.php?mbox=<?php echo $currentMailbox ?>&amp;sort=2">From</a></th>
-				<th><a href="index.php?mbox=<?php echo $currentMailbox ?>&amp;sort=3">Subject</a></th>
-				<th><a href="index.php?mbox=<?php echo $currentMailbox ?>&amp;sort=0">Date</a></th>
-			</tr>
-			<?php 
-			$odd = false;
-			for ($msgInd = $numStart; $msgInd <= $numEnd; $msgInd++) {
-			    $message = $connection->getMessage($msgInd);
-			    $rowClass = ($odd) ? 'odd' : 'even'; 
-			?>
-			<tr class="<?php echo $rowClass ?>">
-				<td><input type="checkbox" name="selected[]" value="<?php echo $msgInd ?>" /></td>
-				<td><?php echo $message->getFrom()->getEmail() ?></td>
-				<td>
-					<a target="_blank" href="showMessage.php?mbox=<?php echo $currentMailbox ?>&amp;msg=<?php echo $msgInd ?>">
-				    <?php echo $message->getSubject() ?></a>
-				</td>
-				<td><?php echo $message->getDate('Y-m-d') ?></td>
-			</tr>
-			<?php
-			    $odd = !$odd; 
-			} 
-			?>
-			</table>
+    		<form method="post" action="">
+    		
+    			<table class="messages-list">
+    			<tr>
+    				<td colspan="4">
+    					<input type="submit" name="delete" value="Delete" />
+    					<input type="submit" name="move" value="Move" />
+    					<input type="submit" name="copy" value="Copy" />
+    					To
+    					<select name="destMbox">
+    						<?php foreach ($mailboxes as $mailbox) { ?>
+    						<option value="<?php echo $mailbox ?>"><?php echo $mailbox ?></option>
+    						<?php } ?>
+    					</select>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th><input type="checkbox" id="selectAll" title="Select All/None" /></th>
+    				<th><a href="index.php?mbox=<?php echo $currentMailbox ?>&amp;sort=2">From</a></th>
+    				<th><a href="index.php?mbox=<?php echo $currentMailbox ?>&amp;sort=3">Subject</a></th>
+    				<th><a href="index.php?mbox=<?php echo $currentMailbox ?>&amp;sort=0">Date</a></th>
+    			</tr>
+    			<?php 
+    			$odd = false;
+    			for ($msgInd = $numStart; $msgInd <= $numEnd; $msgInd++) {
+    			    $message = $connection->getMessage($msgInd);
+    			    $rowClass = ($odd) ? 'odd' : 'even'; 
+    			?>
+    			<tr class="<?php echo $rowClass ?>">
+    				<td><input type="checkbox" name="selected[]" value="<?php echo $message->getMessageNumber() ?>" /></td>
+    				<td><?php echo $message->getFrom()->getEmail() ?></td>
+    				<td>
+    					<a target="_blank" href="showMessage.php?mbox=<?php echo $currentMailbox ?>&amp;msg=<?php echo $message->getMessageNumber() ?>">
+    				    <?php echo $message->getSubject() ?></a>
+    				</td>
+    				<td><?php echo $message->getDate('Y-m-d') ?></td>
+    			</tr>
+    			<?php
+    			    $odd = !$odd; 
+    			} 
+    			?>
+    			</table>
+			
+			</form>
 			
 		</div>
 
@@ -95,15 +145,16 @@ $mailboxes = $connection->getMailboxes();
 			<form method="post" action="">
 				<h3>Add new folder</h3>
 				
-				<input type="text" name="mailbox" size="15" />
-				<input type="submit" name="create" value="+" 
+				<input type="text" name="newFolderName" size="15" />
+				<input type="submit" name="createFolder" value="+" 
 					title="Create folder" />
 			</form>
 		
 		</div>	
 
+		<div class="clear"></div>
 		<div id="ft">
-			Odimail - Juan Odicio Arrieta - Lima, Peru 2009
+			Odimail - Juan Odicio
 		</div>
 		
 	</div>

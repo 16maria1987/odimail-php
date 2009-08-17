@@ -6,9 +6,12 @@ $connection = new Odimail_Connection();
 $pageSize = 5;
 $currentMailbox = isset($_GET['mbox']) ? $_GET['mbox'] : 'INBOX';
 $messageNumber  = isset($_GET['msg']) ? $_GET['msg'] : 1;
+$sort    = isset($_GET['sort']) ? $_GET['sort'] : 1;
 
 $config['mailbox'] = $currentMailbox;
 $connection->open($config);
+
+$connection->sort($sort, Odimail_Connection::SORT_DIR_ASC);
 
 $message = $connection->getMessage($messageNumber);
 

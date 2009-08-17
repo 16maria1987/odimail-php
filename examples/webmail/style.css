@@ -9,7 +9,7 @@ h1, h2, h3 {
 
 
 #page {
-	width: 850px;
+	width: 940px;
 	border: 1px solid #ccc;
 	margin: 10px auto;
 }
@@ -61,14 +61,19 @@ tr.even td {
 
 
 #ft {
-	clear: both;
+	padding: 4px 2px;
 	margin-top: 20px;
 	text-align: center;
 	font-size: 90%;
-	border-top: 1px solid
+	border-top: 1px solid #ccc;
+	
 }
 
 .email {
 	border: 1px solid #EDF5FF;
 	padding: 1px 4px;
+}
+
+.clear {
+	clear: both;
 }
