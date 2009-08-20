@@ -188,13 +188,6 @@ class Odimail_Connection
      */
     public function sort($sortField, $sortDir = self::SORT_DIR_ASC)
     {
-        /*
-        if ($sortDir == $this->_sortDir && $sortField == $this->_sortField
-            && $this->_messagesCount == count($this->_sortedIndex)) {
-            return true;
-        }
-        */
-        
         if ($sortField == self::SORT_ARRIVAL) {
             // This is a performance improvement. 
             // it avoids to make a call to imap_sort()
@@ -245,6 +238,19 @@ class Odimail_Connection
     public function getMessage($messageNo)
     {
         if ($messageNo > 0 && $messageNo <= $this->_messagesCount) {
+            return new Odimail_Message($this, $messageNo, $this->_mailbox);
+        }
+    }
+    
+    /**
+     * Gets 
+     * 
+     * @param int $position
+     * @return Odimail_Message
+     */
+    public function getMessageByOrderNumber($position)
+    {
+        if ($messageNo > 0 && $messageNo <= $this->_messagesCount) {
             $messageNo = $this->_sortedIndex[$messageNo - 1];
             return new Odimail_Message($this, $messageNo, $this->_mailbox);
         }
@@ -259,7 +265,6 @@ class Odimail_Connection
     public function deleteMessage($messageNo) 
     {
         if ($messageNo > 0 && $messageNo <= $this->_messagesCount) {
-            $messageNo = $this->_sortedIndex[$messageNo - 1];
             return @imap_delete($this->getStream(), $messageNo);
         }
         
@@ -395,7 +400,9 @@ class Odimail_Connection
      */
     public function expunge()
     {
-        return @imap_expunge($this->getStream());    
+        $ret = @imap_expunge($this->getStream());
+        $this->countMessages(true);
+        return $ret;    
     }
     
     /**
