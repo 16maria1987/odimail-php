@@ -4,7 +4,7 @@ include_once 'config.php';
 $connection = new Odimail_Connection();
 
 $pageSize = 10;
-$currentMailbox = isset($_GET['mbox']) ? $_GET['mbox'] : 'SENT';
+$currentMailbox = isset($_GET['mbox']) ? $_GET['mbox'] : $config['mailbox'];
 $currentPage    = isset($_GET['page']) ? $_GET['page'] : 1;
 $sort    = isset($_GET['sort']) ? $_GET['sort'] : 1;
 
@@ -43,7 +43,7 @@ if (isset($_POST['delete'])) {
 
 
 
-$connection->sort($sort, Odimail_Connection::SORT_DIR_ASC);
+$connection->sort($sort, Odimail_Connection::SORT_DIR_DESC);
 
 $messagesCount = $connection->countMessages();
 $pagesCount    = ceil($messagesCount / $pageSize);
@@ -111,7 +111,7 @@ sort($mailboxes, SORT_STRING);
     			<?php 
     			$odd = false;
     			for ($msgInd = $numStart; $msgInd <= $numEnd; $msgInd++) {
-    			    $message = $connection->getMessage($msgInd);
+    			    $message = $connection->getSortedMessageByPosition($msgInd);
     			    $rowClass = ($odd) ? 'odd' : 'even'; 
     			?>
     			<tr class="<?php echo $rowClass ?>">

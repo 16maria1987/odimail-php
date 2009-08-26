@@ -2,7 +2,6 @@
 include_once '../Odimail/Connection.php';
 include_once '../Odimail/Contact.php';
 include_once '../Odimail/Message/Part.php';
-include_once '../Odimail/Message/Attachment.php';
 include_once '../Odimail/Message.php';
 
 $config = array(
