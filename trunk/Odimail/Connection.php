@@ -86,12 +86,14 @@ class Odimail_Connection
     
     
     /**
+     * Sorting field
      * 
      * @var string
      */
     protected $_sortField = self::SORT_ARRIVAL;
     
     /**
+     * Sorting direction
      * 
      * @var int
      */
@@ -248,11 +250,11 @@ class Odimail_Connection
      * @param int $position
      * @return Odimail_Message
      */
-    public function getMessageByOrderNumber($position)
+    public function getSortedMessageByPosition($position)
     {
-        if ($messageNo > 0 && $messageNo <= $this->_messagesCount) {
-            $messageNo = $this->_sortedIndex[$messageNo - 1];
-            return new Odimail_Message($this, $messageNo, $this->_mailbox);
+        if ($position > 0 && $position <= $this->_messagesCount) {
+            $messageNo = $this->_sortedIndex[$position - 1];
+            return $this->getMessage($messageNo);
         }
     }
     
